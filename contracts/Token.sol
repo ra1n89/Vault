@@ -11,8 +11,9 @@ contract Token is ERC20Burnable, Ownable {
 
     mapping(address => bool) whiteAndBlackList;
 
-    constructor() ERC20("Gold", "GLD") {
+    constructor(address _vault) ERC20("Gold", "GLD") {
         minter = owner();
+        vault = _vault;
         _mint(owner(), 10000);
         whiteAndBlackList[owner()] = true;
     }
@@ -26,6 +27,8 @@ contract Token is ERC20Burnable, Ownable {
         _mint(_to, _amount);
     }
 
+    
+
     function addToWhiteList(address _whiteListAddr, bool _whiteOrBlacklist)
         public
     {
@@ -38,23 +41,35 @@ contract Token is ERC20Burnable, Ownable {
         returns (bool)
     {
         address owner = owner();
-        console.log(owner);
-        if (
-            whiteAndBlackList[msg.sender] != true ||
-            whiteAndBlackList[msg.sender] != false
-        ) {
-            uint16 fee = 5;
+       
+
+        // if (
+        //     whiteAndBlackList[msg.sender] != true ||
+        //     whiteAndBlackList[msg.sender] != false
+        // ) {
+            if (msg.sender == vault) {
+          console.log(owner);
+          console.log(to);
+          console.log(amount);
+           _transfer(vault, to, amount);
+                   
+            } 
+             uint16 fee = 5;
             uint256 amountFee = (fee * amount) / 100;
             _transfer(owner, to, amount - amountFee);
-            _transfer(owner, to, amountFee);
-            return true;
-        } else {
-            require(
-                whiteAndBlackList[msg.sender] = true,
-                "you are in the blacklist"
-            );
-            _transfer(owner, vault, amount);
-            return true;
-        }
+            _transfer(owner, vault, amountFee);
+            
+        //     return true;
+        // } else {
+        //     require(
+        //         whiteAndBlackList[msg.sender] = true,
+        //         "you are in the blacklist"
+        //     );
+        //     _transfer(owner, vault, amount);
+        //          
     }
+
+    // function balanceOf(address account) public view override returns (uint256){
+    //   balanceOf(account);
+    // }
 }
