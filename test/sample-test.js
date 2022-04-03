@@ -11,32 +11,35 @@ describe("Token", function () {
   before(async () => {
 
     [bob, alice] = await ethers.getSigners();
-    
+
     const Vault = await ethers.getContractFactory("Vault");
     vault = await Vault.deploy();
     await vault.deployed();
-    console.log(vault.address)
-    
+
     const Token = await ethers.getContractFactory("Token");
     token = await Token.deploy(vault.address);
     await token.deployed();
-    console.log(token.address)
+  });
 
-    
+  it('Vault and minter should be not zero addresses', async function () {
+    expect(await token.vault() != 0x0000000000000000000000000000000000000000);
+    expect(await token.minter() != 0x0000000000000000000000000000000000000000);
+  });
+
+  it('Should change minter', async function () {
+    await token.changeMinter(alice.address)
+    expect(await token.minter()).to.be.equal(alice.address)
 
   });
 
+  it('Only minter can mint tokens', async function () {
+    const amountToMint = 100;
+    await token.mint(alice.address, amountToMint);
 
-  it('Checking a contract is deployed', async function () {
-    token.transfer(alice.address, 100)
-    console.log(await token.balanceOf(alice.address))
-    console.log(await token.balanceOf(vault.address))
   });
 
   it('Checking a contract is deployed', async function () {
-    await vault.withdraw(token.address);
-    console.log("vault", await token.balanceOf(vault.address))
-    console.log("owner", await token.balanceOf(bob.address))
+    await token.burn(250);
   });
 
 });

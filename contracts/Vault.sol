@@ -9,16 +9,10 @@ contract Vault is Ownable {
     Token token;
     uint256 amount;
 
- 
-
-    function withdraw(
-        address _token
-     
-    ) public onlyOwner {
+    function withdraw(address _token) public onlyOwner {
         address owner = owner();
         console.log(address(this));
         amount = Token(_token).balanceOf(address(this));
         Token(_token).transfer(owner, amount);
     }
 }
-

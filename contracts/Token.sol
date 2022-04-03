@@ -6,20 +6,26 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
 
 contract Token is ERC20Burnable, Ownable {
-    address vault;
-    address minter;
+    address public vault;
+    address public minter;
 
-    mapping(address => bool) whiteAndBlackList;
+    mapping(address => bool) public whiteList;
+    mapping(address => bool) public blackList;
 
     constructor(address _vault) ERC20("Gold", "GLD") {
         minter = owner();
         vault = _vault;
         _mint(owner(), 10000);
-        whiteAndBlackList[owner()] = true;
+        whiteList[owner()] = true;
     }
 
-    function changeMinter(address _newMinter) public onlyOwner {
+    function changeMinter(address _newMinter)
+        public
+        onlyOwner
+        returns (address)
+    {
         minter = _newMinter;
+        return minter;
     }
 
     function mint(address _to, uint256 _amount) public {
@@ -27,12 +33,12 @@ contract Token is ERC20Burnable, Ownable {
         _mint(_to, _amount);
     }
 
-    
+    function addToWhiteList(address _whiteListAddr) public {
+        whiteList[_whiteListAddr] = true;
+    }
 
-    function addToWhiteList(address _whiteListAddr, bool _whiteOrBlacklist)
-        public
-    {
-        whiteAndBlackList[_whiteListAddr] = _whiteOrBlacklist;
+    function addToBlackList(address _blackListAddr) public {
+        blackList[_blackListAddr] = true;
     }
 
     function transfer(address to, uint256 amount)
@@ -40,35 +46,21 @@ contract Token is ERC20Burnable, Ownable {
         override
         returns (bool)
     {
+        require(blackList[msg.sender] != true, "You are in blackList");
         address owner = owner();
-       
-
-        // if (
-        //     whiteAndBlackList[msg.sender] != true ||
-        //     whiteAndBlackList[msg.sender] != false
-        // ) {
-            if (msg.sender == vault) {
-          console.log(owner);
-          console.log(to);
-          console.log(amount);
-           _transfer(vault, to, amount);
-                   
-            } 
-             uint16 fee = 5;
+        if (msg.sender == vault) {
+            _transfer(vault, to, amount);
+        } else if (whiteList[msg.sender] != true) {
+            uint16 fee = 5;
             uint256 amountFee = (fee * amount) / 100;
             _transfer(owner, to, amount - amountFee);
             _transfer(owner, vault, amountFee);
-            
-        //     return true;
-        // } else {
-        //     require(
-        //         whiteAndBlackList[msg.sender] = true,
-        //         "you are in the blacklist"
-        //     );
-        //     _transfer(owner, vault, amount);
-        //          
+        } else {
+            _transfer(vault, to, amount);
+        }
     }
 
+    //function burn(uint256 _amount) external {}
     // function balanceOf(address account) public view override returns (uint256){
     //   balanceOf(account);
     // }
