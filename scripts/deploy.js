@@ -14,9 +14,14 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const Token = await hre.ethers.getContractFactory("Token");
-  const token = await Token.deploy();
+  const Vault = await hre.ethers.getContractFactory("Vault");
+  const vault = await Vault.deploy();
+  await vault.deployed();
 
+  console.log("Vault deployed to:", vault.address);
+
+  const Token = await hre.ethers.getContractFactory("Token");
+  const token = await Token.deploy(vault.address);
   await token.deployed();
 
   console.log("Token deployed to:", token.address);
