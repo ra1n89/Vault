@@ -47,21 +47,16 @@ contract Token is ERC20Burnable, Ownable {
         returns (bool)
     {
         require(blackList[msg.sender] != true, "You are in blackList");
-        address owner = owner();
         if (msg.sender == vault) {
             _transfer(vault, to, amount);
-        } else if (whiteList[msg.sender] != true) {
+        } else if (whiteList[msg.sender] == false) {
             uint16 fee = 5;
             uint256 amountFee = (fee * amount) / 100;
-            _transfer(owner, to, amount - amountFee);
-            _transfer(owner, vault, amountFee);
+            _transfer(msg.sender, to, amount - amountFee);
+            _transfer(msg.sender, vault, amountFee);
         } else {
-            _transfer(vault, to, amount);
+            _transfer(msg.sender, to, amount);
         }
+        return true;
     }
-
-    //function burn(uint256 _amount) external {}
-    // function balanceOf(address account) public view override returns (uint256){
-    //   balanceOf(account);
-    // }
 }
